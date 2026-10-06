@@ -31,6 +31,10 @@ another application.
 
 That's it — no build step, no dependencies.
 
+To build the Chrome Web Store zip: `scripts/package-extension.sh` (submission
+notes in [store/listing.md](store/listing.md), privacy policy in
+[PRIVACY.md](PRIVACY.md)).
+
 After updating the files, click **⟳** on QuickJump in `chrome://extensions` —
 in **every** profile. Its pages pick up new files on their own, but its
 background worker does not; the settings page warns when a reload is due.
@@ -287,3 +291,7 @@ hub page's realm, so every listener stays bound and nothing is re-created.
   installer without `--no-focus-rule`.
 - Chrome does not show context menus on `chrome://` pages, so those cannot be
   added by right-click. Use the **+** button in the bar.
+
+## License
+
+[MIT](LICENSE). Release builds of the agent bundle PyQt6, which is GPLv3.
