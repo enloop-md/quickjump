@@ -40,7 +40,7 @@ The free, open-source QuickJump agent adds:
 • global keyboard shortcuts to jump to any item from any app,
 • a tray icon that jumps straight to the newest item,
 • starting a closed browser profile right at the saved page.
-Linux is fully supported; macOS and Windows builds are in preview. Download: https://github.com/ryabenko-pro/quickjump
+Linux is fully supported; macOS and Windows builds are in preview. Download: https://github.com/enloop-md/quickjump
 
 PRIVATE BY DESIGN
 No account, no analytics, no servers. Your list stays in your browser. If you use the agent, the extension talks only to it, on your own computer (127.0.0.1). The code is open source under the MIT license.
@@ -69,8 +69,8 @@ The screenshots show the real extension and agent UI with mocked data
 ### Additional fields
 
 - Official URL: *none* (needs a verified domain in Search Console)
-- Homepage URL: `https://ryabenko-pro.github.io/quickjump/`
-- Support URL: `https://github.com/ryabenko-pro/quickjump/issues`
+- Homepage URL: `https://enloop-md.github.io/quickjump/`
+- Support URL: `https://github.com/enloop-md/quickjump/issues`
 - Mature content: **No**
 
 ---
@@ -135,7 +135,7 @@ Certify all three:
 ### Privacy policy URL
 
 ```
-https://github.com/ryabenko-pro/quickjump/blob/main/PRIVACY.md
+https://github.com/enloop-md/quickjump/blob/main/PRIVACY.md
 ```
 
 ---

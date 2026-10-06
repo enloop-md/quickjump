@@ -4,7 +4,7 @@
   "version": "0.3.4",
   "description": "Pin tabs to an always-on-top floating bar and jump back to them with one click.",
   "author": "enloop.md",
-  "homepage_url": "https://ryabenko-pro.github.io/quickjump/",
+  "homepage_url": "https://enloop-md.github.io/quickjump/",
   "minimum_chrome_version": "116",
   "permissions": ["alarms", "contextMenus", "storage", "tabs"],
   "background": {

@@ -40,4 +40,4 @@ everything it stored. The agent's data can be removed from its settings
 
 QuickJump is made by [enloop.md](https://enloop.md).
 
-Questions: open an issue at <https://github.com/ryabenko-pro/quickjump/issues>.
+Questions: open an issue at <https://github.com/enloop-md/quickjump/issues>.
