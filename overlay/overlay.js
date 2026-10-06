@@ -6,8 +6,8 @@ import {
   onAgentStatusChanged,
 } from '../lib/store.js';
 
-/** Where the agent can be downloaded. Not published yet. */
-const AGENT_URL = '';
+/** Where the agent can be downloaded. */
+const AGENT_URL = 'https://github.com/ryabenko-pro/quickjump/releases/latest';
 
 /**
  * Renders the QuickJump list into `root` and keeps it in sync with storage.

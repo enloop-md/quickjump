@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "QuickJump – Return instantly to important tab from any app or screen",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "Pin tabs to an always-on-top floating bar and jump back to them with one click.",
   "homepage_url": "https://ryabenko-pro.github.io/quickjump/",
   "minimum_chrome_version": "116",
