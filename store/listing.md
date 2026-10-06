@@ -10,7 +10,7 @@ paste. Package: `scripts/package-extension.sh` →
 
 **Name** and **Summary** come from `manifest.json`:
 
-- Name: `QuickJump`
+- Name: `QuickJump – Return instantly to important tabs from any app or screen`
 - Summary (≤132 chars): `Pin tabs to an always-on-top floating bar and jump back to them with one click.`
 
 ---

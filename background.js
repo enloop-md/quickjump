@@ -31,25 +31,32 @@ const DEFAULT_GEOM = { left: 60, top: 60, width: 280, height: 200 };
 const MENU_ADD = 'qj-add';
 const MENU_ADD_LINK = 'qj-add-link';
 const MENU_SHOW = 'qj-show';
+const MENU_ROOT = 'qj-root';
 const AGENT_ALARM = 'qj-agent';
 
 /* ------------------------------------------------------------------ menus */
 
 function buildMenus() {
   chrome.contextMenus.removeAll(() => {
+    // Chrome would group the entries under the manifest name, which is the
+    // long store title; group them under the short name instead.
+    chrome.contextMenus.create({ id: MENU_ROOT, title: 'QuickJump', contexts: ['all'] });
     chrome.contextMenus.create({
       id: MENU_ADD,
+      parentId: MENU_ROOT,
       title: 'Add to Quick Jump',
       contexts: ['page', 'selection', 'image', 'video', 'audio', 'editable'],
     });
     chrome.contextMenus.create({
       id: MENU_ADD_LINK,
+      parentId: MENU_ROOT,
       title: 'Add link to Quick Jump',
       contexts: ['link'],
     });
-    chrome.contextMenus.create({ id: 'qj-sep', type: 'separator', contexts: ['all'] });
+    chrome.contextMenus.create({ id: 'qj-sep', parentId: MENU_ROOT, type: 'separator', contexts: ['all'] });
     chrome.contextMenus.create({
       id: MENU_SHOW,
+      parentId: MENU_ROOT,
       title: 'Show Quick Jump bar',
       contexts: ['all'],
     });
