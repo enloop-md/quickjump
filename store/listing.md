@@ -1,88 +1,170 @@
 # Chrome Web Store submission — QuickJump
 
-Everything the Developer Dashboard asks for, ready to paste.
-Package: `scripts/package-extension.sh` → `dist/quickjump-extension-<version>.zip`.
+Every text field the Developer Dashboard asks for, in dashboard order, ready to
+paste. Package: `scripts/package-extension.sh` →
+`dist/quickjump-extension-<version>.zip`.
 
-## Store listing
+---
 
-**Name:** QuickJump
+## 1. Package
 
-**Summary** (≤132 chars, from manifest):
-Pin tabs to an always-on-top floating bar and jump back to them with one click.
+**Name** and **Summary** come from `manifest.json`:
 
-**Category:** Productivity → Tools · **Language:** English
+- Name: `QuickJump`
+- Summary (≤132 chars): `Pin tabs to an always-on-top floating bar and jump back to them with one click.`
 
-**Description:**
+---
 
-On a call, wandered off into other windows, and now someone asks you something
-and you can't find the tab? QuickJump keeps the tabs you need to get back to —
-a call, a doc, a dashboard — in a small bar that floats above your other
-windows. Click an entry and Chrome raises that window and activates that tab.
+## 2. Store listing
 
-• Right-click any page → "Add to Quick Jump". Right-click a link to save it
-  without opening it.
-• Click an entry to jump: the tab is activated and its window un-minimised and
-  raised.
-• Drag to reorder, × or middle-click to remove.
-• Entries survive closed tabs and browser restarts — a closed one reopens its URL.
-• Floats above other windows via Chrome's Picture-in-Picture, with no setup.
-• Auto-hides while Chrome is focused and comes back when you switch apps.
+### Description (plain text, ≤16,000 chars)
 
-Optional desktop agent (free, open source): one shared window for every Chrome
-profile and Chromium browser, global hotkeys, and a tray icon that jumps to the
-newest item. Linux, with macOS and Windows previews:
-https://github.com/ryabenko-pro/quickjump
+```
+On a call, you wander off into other windows, someone asks you a question, and the meeting tab is nowhere to be found. QuickJump fixes that.
 
-Private by design: no accounts, no analytics, no servers. Your list stays in
-your browser and, if you use the agent, on your own computer.
+Pin the tabs you need to get back to (a call, a doc, a dashboard, a ticket) to a small bar that floats above your other windows. Click an entry and Chrome raises that window and switches to that tab, even when it is minimised or on another desktop.
 
-**Homepage / support URL:** https://github.com/ryabenko-pro/quickjump
-**Privacy policy URL:** https://github.com/ryabenko-pro/quickjump/blob/main/PRIVACY.md
+HOW IT WORKS
+• Right-click any page and choose "Add to Quick Jump". Right-click a link to save it without opening it.
+• Click an entry to jump straight to it.
+• Drag entries to reorder them. Remove one with × or a middle-click.
+• Closed a pinned tab? The entry stays (dimmed) and reopens its page with one click. Entries also survive a browser restart.
+• The bar floats above other apps using Chrome's Picture-in-Picture, with no setup needed.
+• Auto-hide: the bar stays out of the way while Chrome is focused and comes back as soon as you switch to another app.
 
-## Graphic assets
+OPTIONAL DESKTOP AGENT
+The free, open-source QuickJump agent adds:
+• one shared window for every Chrome profile and other Chromium browsers,
+• global keyboard shortcuts to jump to any item from any app,
+• a tray icon that jumps straight to the newest item,
+• starting a closed browser profile right at the saved page.
+Linux is fully supported; macOS and Windows builds are in preview. Download: https://github.com/ryabenko-pro/quickjump
+
+PRIVATE BY DESIGN
+No account, no analytics, no servers. Your list stays in your browser. If you use the agent, the extension talks only to it, on your own computer (127.0.0.1). The code is open source under the MIT license.
+```
+
+### Category / Language
+
+- Category: **Productivity → Tools** (Workflow & Planning also fits)
+- Language: **English**
+
+### Graphic assets
 
 | Asset | Size | File |
 |---|---|---|
 | Store icon | 128×128 | `icons/128.png` |
-| Small promo tile (required) | 440×280 | `store/promo-small-440x280.png` |
-| Screenshots (1 required, up to 5) | 1280×800 or 640×400 | **to do** — take them from the real bar |
+| Screenshots (≥1, up to 5) | 1280×800 or 640×400 | **to do**, taken from the real bar |
+| Small promo tile | 440×280 | `store/promo-small-440x280.png` |
+| Marquee promo tile (optional) | 1400×560 | not needed |
 
-Suggested screenshots: the floating bar over another app with a few entries;
-the right-click "Add to Quick Jump" menu; the agent window with profile chips;
-the settings page.
+Suggested screenshots:
+1. The floating bar over another app with 4–5 entries.
+2. The right-click menu with "Add to Quick Jump".
+3. The agent window with profile chips.
+4. The settings page.
 
-## Privacy practices tab
+### Additional fields
 
-**Single purpose:**
-Keep a short list of tabs the user picked and switch back to any of them with
-one click from a floating bar.
+- Official URL: *none* (needs a verified domain in Search Console)
+- Homepage URL: `https://github.com/ryabenko-pro/quickjump`
+- Support URL: `https://github.com/ryabenko-pro/quickjump/issues`
+- Mature content: **No**
 
-**Permission justifications:**
+---
 
-- **tabs** — Read the URL, title and favicon of the tab the user adds, find
-  that tab again later (also by URL after a restart), and activate it.
-- **contextMenus** — Provides the "Add to Quick Jump", "Add link to Quick Jump"
-  and "Show Quick Jump bar" right-click entries, the main way to add items.
-- **storage** — Stores the user's list and settings locally in
-  chrome.storage.local.
-- **alarms** — A 30-second alarm re-checks whether the optional local desktop
-  agent (127.0.0.1) is running and reconnects to it, since the service worker
-  may be suspended between attempts.
+## 3. Privacy practices
 
-**Remote code:** No. All JavaScript is in the package; no eval, no remote scripts.
+### Single purpose description (≤1,000 chars)
 
-**Data usage:** Tick **Web history** only (the URLs and titles of the tabs the
-user adds). Certify all three:
-- not sold or transferred to third parties outside the approved use cases,
-- not used for purposes unrelated to the single purpose,
-- not used for creditworthiness or lending.
+```
+QuickJump keeps a short list of browser tabs the user has chosen and lets them switch back to any of those tabs with one click from a floating bar.
+```
 
-Note for reviewers (if asked): the extension connects only to
-`ws://127.0.0.1:8787` / `http://127.0.0.1:8787` — the user's own optional
-desktop agent. No external network requests.
+### Permission justifications
+
+**tabs**
+```
+Needed to read the URL, title and favicon of the tab the user adds to QuickJump, to find that tab again later (by tab ID, or by URL after a browser restart), and to activate it and focus its window when the user clicks the entry.
+```
+
+**contextMenus**
+```
+Adds the right-click menu entries "Add to Quick Jump", "Add link to Quick Jump" and "Show Quick Jump bar", which are the main way users add pages and open the bar.
+```
+
+**storage**
+```
+Stores the user's list of pinned tabs and their QuickJump settings locally in chrome.storage.local, so they persist across browser restarts. Nothing is synced or sent anywhere.
+```
+
+**alarms**
+```
+A periodic alarm (every 30 seconds) checks whether the user's optional QuickJump desktop agent is running on their own computer (127.0.0.1) and reconnects to it. An alarm is used because the service worker can be suspended between attempts.
+```
+
+**Host permissions:** none requested.
+
+### Remote code
+
+Select **No, I am not using remote code**. All JavaScript ships in the package;
+there are no remote scripts, no `eval` and no `new Function`.
+
+### Data usage
+
+What user data do you plan to collect from users now or in the future?
+
+- [ ] Personally identifiable information
+- [ ] Health information
+- [ ] Financial and payment information
+- [ ] Authentication information
+- [ ] Personal communications
+- [ ] Location
+- [x] **Web history**: the URLs and titles of the tabs the user explicitly adds (stored only on the device)
+- [ ] User activity
+- [ ] Website content
+
+Certify all three:
+
+- [x] I do not sell or transfer user data to third parties, outside of the approved use cases
+- [x] I do not use or transfer user data for purposes that are unrelated to my item's single purpose
+- [x] I do not use or transfer user data to determine creditworthiness or for lending purposes
+
+### Privacy policy URL
+
+```
+https://github.com/ryabenko-pro/quickjump/blob/main/PRIVACY.md
+```
+
+---
+
+## 4. Distribution
+
+- Payments: **Free**
+- Visibility: **Public**
+- Regions: **All regions**
+
+---
+
+## 5. Test instructions (for the reviewer)
+
+Username / password: *leave empty, no login.*
+
+Additional instructions:
+```
+No account or setup is needed.
+
+1. Open any web page, right-click it and choose "Add to Quick Jump".
+2. Click the QuickJump toolbar icon. The popup lists the page; click it to jump to that tab from any other tab or window.
+3. Toolbar icon → "Floating bar" opens the bar as a small window. "Always on top (PiP)" opens a pinned tab; press "Float the bar" there to float it above other windows.
+
+The extension tries to connect to an optional companion desktop app at ws://127.0.0.1:8787 (the user's own computer). When the app is not installed, the connection fails silently and the extension works on its own. It makes no other network requests.
+```
+
+---
 
 ## Before each upload
 
-1. Bump `version` in `manifest.json` (the store rejects a version it has seen).
-2. `scripts/package-extension.sh`
-3. Load the zip's contents unpacked in a clean profile and smoke-test.
+1. Bump `version` in `manifest.json` (the store rejects a version it has already seen).
+2. Run `scripts/package-extension.sh`.
+3. Unzip into a clean profile, load it unpacked and smoke-test it.
