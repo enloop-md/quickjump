@@ -44,6 +44,8 @@ Linux is fully supported; macOS and Windows builds are in preview. Download: htt
 
 PRIVATE BY DESIGN
 No account, no analytics, no servers. Your list stays in your browser. If you use the agent, the extension talks only to it, on your own computer (127.0.0.1). The code is open source under the MIT license.
+
+Created by enloop.md: https://enloop.md
 ```
 
 ### Category / Language

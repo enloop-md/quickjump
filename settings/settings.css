@@ -55,6 +55,12 @@ body.qj-settings {
   border-radius: 4px;
 }
 
+.qj-settings .qj-credit {
+  padding: 10px 0 0;
+  border-top: 1px solid var(--qj-line);
+  text-align: left;
+}
+
 .set-alert {
   margin: 0 0 8px;
   padding: 8px 10px;

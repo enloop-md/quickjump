@@ -1,5 +1,7 @@
 # QuickJump
 
+*Created by [enloop.md](https://enloop.md).*
+
 Pin the tabs you need to get back to — a call, a doc, a dashboard — into a small
 bar that floats above every other window, on every virtual desktop. Click an
 entry and Chrome raises that window and activates that tab.

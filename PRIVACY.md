@@ -38,4 +38,6 @@ everything it stored. The agent's data can be removed from its settings
 
 ## Contact
 
+QuickJump is made by [enloop.md](https://enloop.md).
+
 Questions: open an issue at <https://github.com/ryabenko-pro/quickjump/issues>.

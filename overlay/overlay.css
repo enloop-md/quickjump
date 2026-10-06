@@ -256,6 +256,24 @@ body.qj-pip .qj {
   }
 }
 
+/* ------------------------------------------------------------------ credit */
+
+.qj-credit {
+  padding: 6px 10px 7px;
+  text-align: center;
+  font-size: 11px;
+  color: var(--qj-muted);
+}
+
+.qj-credit a {
+  color: var(--qj-muted);
+  font-weight: 600;
+}
+
+.qj-credit a:hover {
+  color: var(--qj-accent);
+}
+
 /* ------------------------------------------------------------------- empty */
 
 .qj-empty {
