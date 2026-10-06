@@ -25,6 +25,8 @@ another application.
 
 ## Install the extension
 
+From the [Chrome Web Store](https://chromewebstore.google.com/detail/ghjpaalofbdajafokhaecblmmaeidhep), or from source:
+
 1. Open `chrome://extensions`.
 2. Turn on **Developer mode** (top right).
 3. **Load unpacked** → select this directory.

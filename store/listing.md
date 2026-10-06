@@ -1,5 +1,7 @@
 # Chrome Web Store submission — QuickJump
 
+Extension ID `ghjpaalofbdajafokhaecblmmaeidhep` · listing: https://chromewebstore.google.com/detail/ghjpaalofbdajafokhaecblmmaeidhep
+
 Every text field the Developer Dashboard asks for, in dashboard order, ready to
 paste. Package: `scripts/package-extension.sh` →
 `dist/quickjump-extension-<version>.zip`.
