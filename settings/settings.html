@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>QuickJump settings</title>
+    <link rel="stylesheet" href="../overlay/overlay.css" />
+    <link rel="stylesheet" href="settings.css" />
+  </head>
+  <body class="qj-settings">
+    <h1>QuickJump settings</h1>
+
+    <section>
+      <h2>QuickJump agent</h2>
+      <div id="agentAlert" class="set-alert" hidden></div>
+      <p id="agentStatus" class="set-status">Checking…</p>
+      <label class="set-row">
+        <span>Agent port:</span>
+        <input type="number" id="agentPort" min="1024" max="65535" />
+      </label>
+      <p class="set-note">Must match the port in the agent's settings.</p>
+    </section>
+
+    <section>
+      <h2>Fallback bar</h2>
+      <label class="set-row">
+        <input type="checkbox" id="autoHide" />
+        <span>Auto-hide: hidden while Chrome is focused, shown when you switch
+          to another app (the agent window has its own setting)</span>
+      </label>
+    </section>
+
+    <section>
+      <h2>List</h2>
+      <label class="set-row">
+        <input type="checkbox" id="newItemsOnTop" />
+        <span>Put new items at the top of the list</span>
+      </label>
+    </section>
+
+    <script type="module" src="settings.js"></script>
+  </body>
+</html>

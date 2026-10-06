@@ -1,0 +1,5 @@
+#!/bin/sh
+# AppImage entry point. $APPIMAGE (set by the runtime) is the .AppImage file
+# itself — the agent uses it for its menu entry, autostart and hotkey helper.
+HERE="$(dirname "$(readlink -f "$0")")"
+exec "$HERE/usr/lib/quickjump-agent/quickjump-agent" "$@"

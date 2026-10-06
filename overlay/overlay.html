@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <!--
+      The KWin rule in kde/ matches windows whose title contains "QuickJump Bar".
+      It has to be distinct from the hub page's title: a normal browser window
+      showing the hub is captioned "QuickJump Hub - Google Chrome", and must not
+      get pinned always-on-top by the rule. Keep these two titles in sync with
+      kde/install-kwin-rules.sh.
+    -->
+    <title>QuickJump Bar</title>
+    <link rel="stylesheet" href="overlay.css" />
+  </head>
+  <body class="qj-standalone">
+    <div id="root"></div>
+    <script type="module" src="standalone.js"></script>
+  </body>
+</html>

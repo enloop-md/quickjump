@@ -1,0 +1,62 @@
+name: agent
+
+# Builds the QuickJump agent for every OS. Tag vX.Y.Z to publish a release.
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+    paths: ['agent/**', 'icons/**', '.github/workflows/agent.yml']
+  pull_request:
+    paths: ['agent/**', 'icons/**', '.github/workflows/agent.yml']
+  workflow_dispatch:
+
+jobs:
+  linux:
+    # Oldest supported runner = widest glibc compatibility for the AppImage.
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - name: Qt runtime libraries for PyInstaller to bundle
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libxkbcommon-x11-0 libxcb-cursor0 libxcb-icccm4 libxcb-image0 \
+            libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-shape0 libxcb-xinerama0 libxcb-xkb1 \
+            libegl1 libwayland-cursor0 libwayland-egl1
+      - run: agent/packaging/linux/build-appimage.sh --native
+      - uses: actions/upload-artifact@v4
+        with: { name: agent-linux, path: dist/*.AppImage }
+
+  macos:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: agent/packaging/macos/build.sh
+      - uses: actions/upload-artifact@v4
+        with: { name: agent-macos, path: dist/*.dmg }
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: agent\packaging\windows\build.ps1
+        shell: pwsh
+      - uses: actions/upload-artifact@v4
+        with: { name: agent-windows, path: dist/*.zip }
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [linux, macos, windows]
+    runs-on: ubuntu-latest
+    permissions: { contents: write }
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { path: dist, merge-multiple: true }
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          draft: true

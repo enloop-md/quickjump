@@ -1,0 +1,270 @@
+:root {
+  --qj-bg: #171a21;
+  --qj-fg: #e6e8ee;
+  --qj-muted: #8b93a7;
+  --qj-hover: #262b36;
+  --qj-active: #2f3542;
+  --qj-line: #2a2f3a;
+  --qj-accent: #6aa8ff;
+  color-scheme: dark light;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --qj-bg: #f7f8fa;
+    --qj-fg: #1b1f27;
+    --qj-muted: #6b7280;
+    --qj-hover: #e9ecf2;
+    --qj-active: #dde2ea;
+    --qj-line: #dfe3ea;
+    --qj-accent: #2563eb;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--qj-bg);
+  color: var(--qj-fg);
+  font: 13px/1.35 system-ui, "Noto Sans", sans-serif;
+  overflow: hidden;
+}
+
+body.qj-popup {
+  width: 300px;
+  overflow: auto;
+}
+
+.qj {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--qj-bg);
+  user-select: none;
+}
+
+body.qj-standalone .qj,
+body.qj-pip .qj {
+  height: 100vh;
+}
+
+/* ------------------------------------------------------------------ header */
+
+.qj-head {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 6px 5px 9px;
+  border-bottom: 1px solid var(--qj-line);
+  flex: 0 0 auto;
+}
+
+.qj-brand {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--qj-muted);
+}
+
+.qj-spacer {
+  flex: 1;
+}
+
+/* ------------------------------------------------------------ agent notes */
+
+.qj-btn.qj-info-btn {
+  font: italic 600 11px/1 Georgia, serif;
+  color: var(--qj-accent);
+}
+
+.qj-info,
+.qj-alert,
+.qj-note {
+  flex: 0 0 auto;
+  padding: 7px 10px;
+  font-size: 11px;
+  border-bottom: 1px solid var(--qj-line);
+}
+
+.qj-info {
+  color: var(--qj-muted);
+}
+
+.qj-info a {
+  color: var(--qj-accent);
+}
+
+.qj-alert {
+  padding: 9px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #1b1f27;
+  background: #f2b84b;
+}
+
+.qj-note {
+  color: var(--qj-muted);
+}
+
+.qj-btn {
+  all: unset;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  font-size: 15px;
+  line-height: 1;
+  color: var(--qj-muted);
+  cursor: pointer;
+}
+
+.qj-btn:hover {
+  background: var(--qj-hover);
+  color: var(--qj-fg);
+}
+
+.qj-btn:focus-visible {
+  outline: 2px solid var(--qj-accent);
+  outline-offset: -1px;
+}
+
+/* -------------------------------------------------------------------- list */
+
+.qj-list {
+  list-style: none;
+  margin: 0;
+  padding: 3px;
+  overflow-y: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.qj-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 4px 5px 6px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.qj-item:hover {
+  background: var(--qj-hover);
+}
+
+.qj-item:active {
+  background: var(--qj-active);
+}
+
+.qj-dragging {
+  opacity: 0.45;
+}
+
+.qj-fav {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+}
+
+.qj-fav img {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+}
+
+.qj-fav-letter {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  display: grid;
+  place-items: center;
+  font-size: 10px;
+  font-weight: 600;
+  background: var(--qj-active);
+  color: var(--qj-muted);
+}
+
+.qj-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* A closed tab stays in the list — clicking it reopens the URL. */
+.qj-dead .qj-fav,
+.qj-dead .qj-title {
+  opacity: 0.5;
+}
+
+.qj-dead .qj-title {
+  font-style: italic;
+}
+
+.qj-remove {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  font-size: 13px;
+  visibility: hidden;
+}
+
+.qj-item:hover .qj-remove,
+.qj-remove:focus-visible {
+  visibility: visible;
+}
+
+/* ----------------------------------------------------------- compact modes */
+
+/* The standalone bar can be resized down to almost nothing (see the KWin
+   rule's noborder/strictgeometry). Shed chrome as space runs out. */
+@media (max-width: 220px) {
+  body.qj-standalone .qj-brand {
+    display: none;
+  }
+}
+
+/* Below ~2 rows of height the header is pure overhead — keep just the list.
+   Everything in it stays reachable elsewhere: the context menu,
+   Alt+Shift+J to hide. */
+@media (max-height: 72px) {
+  body.qj-standalone .qj-head {
+    display: none;
+  }
+
+  body.qj-standalone .qj-list {
+    padding: 1px;
+  }
+
+  body.qj-standalone .qj-item {
+    padding-top: 3px;
+    padding-bottom: 3px;
+  }
+}
+
+/* ------------------------------------------------------------------- empty */
+
+.qj-empty {
+  padding: 14px 12px;
+  text-align: center;
+  color: var(--qj-muted);
+  font-size: 12px;
+}
+
+.qj-empty[hidden] {
+  display: none;
+}

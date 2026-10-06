@@ -1,0 +1,31 @@
+[QuickJump floating bar]
+Description=QuickJump floating bar
+above=true
+aboverule=2
+desktops=
+desktopsrule=2
+noborder=true
+noborderrule=2
+positionrule=4
+sizerule=4
+skippager=true
+skippagerrule=2
+skipswitcher=true
+skipswitcherrule=2
+skiptaskbar=true
+skiptaskbarrule=2
+strictgeometry=false
+strictgeometryrule=2
+title=QuickJump Bar
+titlematch=2
+types=1
+wmclassmatch=0
+
+[QuickJump: let Chrome raise its own windows]
+Description=QuickJump: let Chrome raise its own windows
+fsplevel=0
+fsplevelrule=2
+types=1
+wmclass=[Gg]oogle-chrome
+wmclasscomplete=false
+wmclassmatch=3

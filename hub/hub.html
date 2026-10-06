@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <!-- Deliberately not "QuickJump Bar" — see the note in overlay/overlay.html. -->
+    <title>QuickJump Hub</title>
+    <!-- data-qj-shared marks stylesheets that get cloned into the PiP window. -->
+    <link rel="stylesheet" href="../overlay/overlay.css" data-qj-shared />
+    <link rel="stylesheet" href="hub.css" />
+  </head>
+  <body class="qj-hub">
+    <main class="hub-card">
+      <h1>QuickJump — always-on-top bar</h1>
+      <p class="hub-lead">
+        Chrome can float a Picture-in-Picture window above every other window, on
+        any OS. It stays up as long as <strong>this pinned tab stays open</strong>.
+      </p>
+
+      <button id="start" class="hub-start" type="button">Float the bar</button>
+      <p id="status" class="hub-status" role="status"></p>
+
+      <div id="holder" class="hub-holder">
+        <div id="root"></div>
+      </div>
+
+      <ul class="hub-tips">
+        <li>Keep this tab pinned and leave it open — closing it closes the bar.</li>
+        <li>Drag the floating window anywhere; it stays above other apps.</li>
+        <li>Prefer a real window instead? Use the popup-window mode plus the KWin rule (see README).</li>
+      </ul>
+    </main>
+    <script type="module" src="hub.js"></script>
+  </body>
+</html>

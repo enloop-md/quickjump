@@ -1,0 +1,81 @@
+body.qj-hub {
+  overflow: auto;
+  display: grid;
+  place-items: start center;
+  padding: 48px 16px;
+}
+
+.hub-card {
+  width: min(560px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.hub-card h1 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.hub-lead {
+  margin: 0;
+  color: var(--qj-muted);
+  line-height: 1.5;
+}
+
+.hub-start {
+  all: unset;
+  align-self: start;
+  padding: 9px 18px;
+  border-radius: 8px;
+  background: var(--qj-accent);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.hub-start:hover {
+  filter: brightness(1.1);
+}
+
+.hub-start:focus-visible {
+  outline: 2px solid var(--qj-fg);
+  outline-offset: 2px;
+}
+
+.hub-start[disabled] {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.hub-status {
+  margin: 0;
+  min-height: 1.2em;
+  font-size: 12px;
+  color: var(--qj-muted);
+}
+
+.hub-status.is-error {
+  color: #ff8080;
+}
+
+/* Preview of the bar while it is docked here rather than floating. */
+.hub-holder {
+  border: 1px solid var(--qj-line);
+  border-radius: 10px;
+  overflow: hidden;
+  width: 300px;
+}
+
+.hub-holder:empty {
+  display: none;
+}
+
+.hub-tips {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--qj-muted);
+  font-size: 12px;
+  line-height: 1.7;
+}

@@ -1,0 +1,27 @@
+.pop-actions {
+  display: flex;
+  gap: 6px;
+  padding: 6px;
+  border-top: 1px solid var(--qj-line);
+}
+
+.pop-actions button {
+  all: unset;
+  flex: 1;
+  padding: 7px 6px;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--qj-fg);
+  background: var(--qj-hover);
+  cursor: pointer;
+}
+
+.pop-actions button:hover {
+  background: var(--qj-active);
+}
+
+.pop-actions button:focus-visible {
+  outline: 2px solid var(--qj-accent);
+  outline-offset: -2px;
+}
