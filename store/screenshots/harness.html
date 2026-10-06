@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>QuickJump harness</title>
+    <!--
+      Renders the real extension UI (overlay.js, settings.js and their CSS)
+      against a stubbed `chrome` API filled with mock-data.js.
+
+      ?view=bar|popup|settings  which page to render
+      ?n=5                      how many mock jumps to show
+      ?agent=none|seen|connected
+      ?hover=j2                 show that row as hovered
+    -->
+    <link rel="stylesheet" href="../../overlay/overlay.css" />
+    <style>
+      /* Stand-in for :hover, which a screenshot cannot trigger. */
+      .qj-item.is-hover { background: var(--qj-hover); }
+      .qj-item.is-hover .qj-remove { visibility: visible; }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module">
+      import { JUMPS } from './mock-data.js';
+
+      const q = new URLSearchParams(location.search);
+      const view = q.get('view') || 'bar';
+      const agent = q.get('agent') || 'connected';
+      const jumps = JUMPS.slice(0, Number(q.get('n') || 5));
+
+      const local = {
+        jumps,
+        settings: {},
+        agentSeen: agent !== 'none',
+        profileName: agent === 'connected' ? 'WORK' : '',
+      };
+      const session = { agentConnected: agent === 'connected' };
+      const area = (data) => ({
+        async get(keys) {
+          if (keys == null) return { ...data };
+          const list = typeof keys === 'string' ? [keys] : Array.isArray(keys) ? keys : Object.keys(keys);
+          return Object.fromEntries(list.filter((k) => k in data).map((k) => [k, data[k]]));
+        },
+        async set() {},
+        async remove() {},
+      });
+      globalThis.chrome = {
+        storage: { local: area(local), session: area(session), onChanged: { addListener() {} } },
+        runtime: { sendMessage: async () => ({ ok: true }), getURL: (p) => p },
+      };
+
+      async function adopt(path) {
+        // Pull another extension page's markup and styles into this document.
+        const html = await (await fetch(path)).text();
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        const base = new URL(path, location.href);
+        for (const link of doc.querySelectorAll('link[rel=stylesheet]')) {
+          const href = new URL(link.getAttribute('href'), base).href;
+          if (!document.querySelector(`link[href="${href}"]`)) {
+            const l = document.createElement('link');
+            l.rel = 'stylesheet';
+            l.href = href;
+            document.head.append(l);
+            await new Promise((r) => (l.onload = l.onerror = r));
+          }
+        }
+        document.body.className = doc.body.className;
+        document.body.replaceChildren(...[...doc.body.children].filter((n) => n.tagName !== 'SCRIPT'));
+      }
+
+      if (view === 'settings') {
+        await adopt('../../settings/settings.html');
+        await import('../../settings/settings.js');
+      } else if (view === 'popup') {
+        await adopt('../../popup/popup.html');
+        await import('../../popup/popup.js');
+      } else {
+        document.body.className = 'qj-standalone';
+        const { mountOverlay } = await import('../../overlay/overlay.js');
+        mountOverlay(document.getElementById('root'), { showClose: true });
+      }
+
+      await new Promise((r) => setTimeout(r, 100));
+      const hover = q.get('hover');
+      if (hover) document.querySelector(`.qj-item[data-id="${hover}"]`)?.classList.add('is-hover');
+      document.documentElement.dataset.ready = '1';
+    </script>
+  </body>
+</html>

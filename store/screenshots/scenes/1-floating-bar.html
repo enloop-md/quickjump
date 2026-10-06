@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><link rel="stylesheet" href="scene.css">
+<style>
+  .sheet { left: 455px; top: 160px; width: 470px; height: 400px; }
+  .grid { display: grid; grid-template-columns: 34px repeat(6, 1fr); font-size: 11.5px; }
+  .grid div { height: 25px; padding: 4px 6px; border-right: 1px solid #e5e7eb; border-bottom: 1px solid #e5e7eb; color: #374151; white-space: nowrap; overflow: hidden; }
+  .grid .h { background: #f3f4f6; color: #6b7280; text-align: center; }
+  .grid .sel { outline: 2px solid #16a34a; outline-offset: -2px; }
+  .toolbar { height: 34px; display: flex; gap: 14px; align-items: center; padding: 0 12px; border-bottom: 1px solid #e5e7eb; font-size: 12px; color: #6b7280; }
+  .term { left: 44px; top: 300px; width: 450px; height: 250px; background: #10141c; }
+  .term .bar { background: #1c222d; color: #9aa3b2; border-color: #2a3240; }
+  .term pre { margin: 0; padding: 12px; font: 11.5px/1.55 "DejaVu Sans Mono", monospace; color: #9fe2a7; }
+  .term pre b { color: #7aa7ff; font-weight: normal; }
+  iframe.qj { left: 600px; top: 52px; width: 290px; height: 182px; }
+  .cursor { left: 752px; top: 94px; }
+</style></head><body>
+  <div class="cap">
+    <div class="brand"><img src="../../../icons/128.png" alt="">QuickJump</div>
+    <h1>The tabs you need,<br>above every window</h1>
+    <p>A small bar floats over your other apps. Click an entry and Chrome jumps straight to that tab.</p>
+  </div>
+
+  <div class="win term"><div class="bar"><span class="dots"><i></i><i></i><i></i></span>Terminal</div>
+<pre><b>~/app $</b> npm test
+ PASS  auth/session.test.js
+ PASS  auth/login.test.js
+ FAIL  api/timeout.test.js
+   ● login › retries after timeout
+
+<b>~/app $</b> git checkout fix/login-timeout
+Switched to branch 'fix/login-timeout'
+<b>~/app $</b> █</pre></div>
+
+  <div class="win sheet">
+    <div class="bar"><span class="dots"><i></i><i></i><i></i></span>Budget 2027.ods — Spreadsheet</div>
+    <div class="toolbar"><span>File</span><span>Edit</span><span>View</span><span>Insert</span><span>Format</span><span>Data</span></div>
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <iframe class="qj" src="../harness.html?view=bar&agent=none&n=5&hover=j1"></iframe>
+  <img class="cursor" src="cursor.svg" alt="">
+
+  <script>
+    const rows = [
+      ['', 'A', 'B', 'C', 'D', 'E', 'F'],
+      ['1', 'Item', 'Q1', 'Q2', 'Q3', 'Q4', 'Total'],
+      ['2', 'Hosting', '4,200', '4,350', '4,600', '4,800', '17,950'],
+      ['3', 'Licences', '1,150', '1,150', '1,300', '1,300', '4,900'],
+      ['4', 'Contractors', '9,000', '8,400', '7,200', '7,800', '32,400'],
+      ['5', 'Travel', '600', '1,800', '450', '2,100', '4,950'],
+      ['6', 'Hardware', '3,200', '0', '1,100', '0', '4,300'],
+      ['7', 'Training', '0', '750', '750', '1,500', '3,000'],
+      ['8', 'Events', '1,200', '0', '2,400', '0', '3,600'],
+      ['9', 'Total', '19,350', '16,450', '17,800', '17,500', '71,100'],
+      ['10', '', '', '', '', '', ''], ['11', '', '', '', '', '', ''], ['12', '', '', '', '', '', ''],
+      ['13', '', '', '', '', '', ''],
+    ];
+    const g = document.getElementById('grid');
+    rows.forEach((r, i) => r.forEach((c, j) => {
+      const d = document.createElement('div');
+      d.textContent = c;
+      if (i === 0 || j === 0) d.className = 'h';
+      if (i === 4 && j === 3) d.className = 'sel';
+      if (i === 1 || i === 9) d.style.fontWeight = 600;
+      if (j > 1 && i > 0) d.style.textAlign = 'right';
+      g.append(d);
+    }));
+  </script>
+</body></html>

@@ -54,20 +54,18 @@ No account, no analytics, no servers. Your list stays in your browser. If you us
 | Asset | Size | File |
 |---|---|---|
 | Store icon | 128×128 | `icons/128.png` |
-| Screenshots (≥1, up to 5) | 1280×800 or 640×400 | **to do**, taken from the real bar |
+| Screenshots (≥1, up to 5) | 1280×800 | `store/screenshots/out/1-floating-bar.png`, `2-add-from-menu.png`, `3-agent.png`, `4-popup.png` |
 | Small promo tile | 440×280 | `store/promo-small-440x280.png` |
 | Marquee promo tile (optional) | 1400×560 | not needed |
 
-Suggested screenshots:
-1. The floating bar over another app with 4–5 entries.
-2. The right-click menu with "Add to Quick Jump".
-3. The agent window with profile chips.
-4. The settings page.
+The screenshots show the real extension and agent UI with mocked data
+(`store/screenshots/mock-data.js`). Rebuild them after a UI change with
+`store/screenshots/render.sh`, which also refreshes `site/img/`.
 
 ### Additional fields
 
 - Official URL: *none* (needs a verified domain in Search Console)
-- Homepage URL: `https://github.com/ryabenko-pro/quickjump`
+- Homepage URL: `https://ryabenko-pro.github.io/quickjump/`
 - Support URL: `https://github.com/ryabenko-pro/quickjump/issues`
 - Mature content: **No**
 

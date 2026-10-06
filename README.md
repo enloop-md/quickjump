@@ -33,7 +33,8 @@ That's it — no build step, no dependencies.
 
 To build the Chrome Web Store zip: `scripts/package-extension.sh` (submission
 notes in [store/listing.md](store/listing.md), privacy policy in
-[PRIVACY.md](PRIVACY.md)).
+[PRIVACY.md](PRIVACY.md)). Website: `site/`, published to
+<https://ryabenko-pro.github.io/quickjump/> by `.github/workflows/pages.yml`.
 
 After updating the files, click **⟳** on QuickJump in `chrome://extensions` —
 in **every** profile. Its pages pick up new files on their own, but its

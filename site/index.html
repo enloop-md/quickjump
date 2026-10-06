@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>QuickJump — jump back to the tabs that matter</title>
+  <meta name="description" content="Pin tabs to an always-on-top floating bar and jump back to them with one click. A free, open-source Chrome extension with an optional desktop agent.">
+  <meta property="og:title" content="QuickJump">
+  <meta property="og:description" content="Pin tabs to an always-on-top floating bar and jump back to them with one click.">
+  <meta property="og:image" content="img/1-floating-bar.png">
+  <link rel="icon" href="img/icon-32.png">
+  <style>
+    :root {
+      --bg: #f6f7fb;
+      --surface: #ffffff;
+      --fg: #161b26;
+      --muted: #5b6475;
+      --line: #e2e6ee;
+      --accent: #2f5fd0;
+      --accent-fg: #ffffff;
+      --hero-from: #141a2b;
+      --hero-to: #2c4699;
+      --shadow: 0 18px 50px rgba(20, 26, 43, 0.18);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f131c;
+        --surface: #171c27;
+        --fg: #e8ebf2;
+        --muted: #9aa3b5;
+        --line: #262d3b;
+        --accent: #6f9bff;
+        --accent-fg: #0b1020;
+        --shadow: 0 18px 50px rgba(0, 0, 0, 0.5);
+      }
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font: 17px/1.6 "Noto Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    }
+    a { color: var(--accent); }
+    img { max-width: 100%; height: auto; display: block; }
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+
+    /* Hero */
+    .hero {
+      color: #fff;
+      background: radial-gradient(1100px 600px at 85% 120%, var(--hero-to) 0%, #1f2a44 55%, var(--hero-from) 100%);
+      padding: 22px 0 0;
+      overflow: hidden;
+    }
+    nav { display: flex; align-items: center; gap: 22px; font-size: 15px; }
+    nav .logo { display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: 0.04em; color: #fff; text-decoration: none; margin-right: auto; }
+    nav .logo img { width: 30px; height: 30px; border-radius: 7px; box-shadow: 0 0 0 1px rgba(255,255,255,.2); }
+    nav a { color: #c9d6f2; text-decoration: none; }
+    nav a:hover { color: #fff; }
+    .hero-body { text-align: center; padding: 64px 0 44px; }
+    .hero h1 { margin: 0 auto 16px; max-width: 760px; font-size: clamp(34px, 6vw, 58px); line-height: 1.08; letter-spacing: -0.02em; }
+    .hero p.lead { margin: 0 auto 30px; max-width: 640px; font-size: clamp(17px, 2.2vw, 20px); color: #c9d6f2; }
+    .cta { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 9px;
+      padding: 13px 22px; border-radius: 10px;
+      font-weight: 700; font-size: 16px; text-decoration: none;
+    }
+    .btn.primary { background: #fff; color: #17213a; }
+    .btn.primary:hover { background: #e7edfb; }
+    .btn.ghost { color: #fff; box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.45); }
+    .btn.ghost:hover { background: rgba(255,255,255,.08); }
+    .btn svg { width: 18px; height: 18px; }
+    .note { margin-top: 14px; font-size: 14px; color: #9fb4e6; }
+    .hero-shot { margin: 0 auto; width: 100%; max-width: 960px; border-radius: 14px 14px 0 0; box-shadow: 0 -10px 60px rgba(0,0,0,.35); }
+
+    /* Sections */
+    section { padding: 84px 0; }
+    section + section { border-top: 1px solid var(--line); }
+    h2 { margin: 0 0 12px; font-size: clamp(26px, 3.6vw, 36px); line-height: 1.15; letter-spacing: -0.01em; }
+    .sub { margin: 0 0 40px; color: var(--muted); max-width: 660px; }
+    .center { text-align: center; }
+    .center .sub { margin-left: auto; margin-right: auto; }
+
+    .problem { font-size: clamp(19px, 2.4vw, 23px); max-width: 760px; margin: 0 auto; text-align: center; color: var(--muted); }
+    .problem strong { color: var(--fg); }
+
+    .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 24px; }
+    .card h3 { margin: 12px 0 6px; font-size: 18px; }
+    .card p { margin: 0; color: var(--muted); font-size: 15.5px; }
+    .icon { width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent); }
+    .icon svg { width: 22px; height: 22px; }
+
+    .split { display: grid; grid-template-columns: 1fr 1.25fr; gap: 48px; align-items: center; }
+    .split.flip { grid-template-columns: 1.25fr 1fr; }
+    .split.flip .text { order: 2; }
+    .shot { border-radius: 12px; box-shadow: var(--shadow); }
+    ul.ticks { list-style: none; padding: 0; margin: 18px 0 0; }
+    ul.ticks li { position: relative; padding-left: 28px; margin: 10px 0; color: var(--muted); }
+    ul.ticks li strong { color: var(--fg); }
+    ul.ticks li::before { content: ""; position: absolute; left: 0; top: 7px; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='8'/%3E%3C/svg%3E"); }
+    ul.ticks li::after { content: ""; position: absolute; left: 5px; top: 10px; width: 4px; height: 8px; border: solid var(--surface); border-width: 0 2px 2px 0; transform: rotate(45deg); }
+    kbd { font: 600 0.85em/1 "DejaVu Sans Mono", ui-monospace, monospace; padding: 3px 7px; border-radius: 5px; border: 1px solid var(--line); border-bottom-width: 2px; background: var(--surface); color: var(--fg); white-space: nowrap; }
+
+    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; counter-reset: step; }
+    .step { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 24px; }
+    .step::before { counter-increment: step; content: counter(step); display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: var(--accent-fg); font-weight: 800; margin-bottom: 12px; }
+    .step h3 { margin: 0 0 6px; font-size: 18px; }
+    .step p { margin: 0; color: var(--muted); font-size: 15.5px; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 15.5px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+    th, td { text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+    th { font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+    tr:last-child td { border-bottom: 0; }
+
+    .privacy { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 36px; display: grid; grid-template-columns: auto 1fr; gap: 24px; align-items: start; }
+    .privacy .icon { width: 56px; height: 56px; border-radius: 14px; }
+    .privacy .icon svg { width: 30px; height: 30px; }
+    .privacy h2 { font-size: 26px; }
+    .privacy p { margin: 0 0 10px; color: var(--muted); }
+
+    footer { padding: 36px 0 48px; color: var(--muted); font-size: 14.5px; border-top: 1px solid var(--line); }
+    footer .wrap { display: flex; flex-wrap: wrap; gap: 18px; align-items: center; }
+    footer .grow { margin-right: auto; }
+
+    @media (max-width: 860px) {
+      .features, .steps { grid-template-columns: 1fr; }
+      .split, .split.flip { grid-template-columns: 1fr; gap: 28px; }
+      .split.flip .text { order: 0; }
+      nav a:not(.logo) { display: none; }
+      section { padding: 60px 0; }
+      .privacy { grid-template-columns: 1fr; padding: 24px; }
+      .wrap { padding: 0 16px; }
+      .table-scroll { overflow-x: auto; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <nav>
+      <a class="logo" href="#"><img src="img/icon-128.png" alt="">QUICKJUMP</a>
+      <a href="#features">Features</a>
+      <a href="#agent">Desktop agent</a>
+      <a href="#privacy">Privacy</a>
+      <a href="https://github.com/ryabenko-pro/quickjump">GitHub</a>
+    </nav>
+    <div class="hero-body">
+      <h1>Jump back to the tabs that matter, from any window</h1>
+      <p class="lead">Pin a call, a doc or a dashboard to a small bar that floats above every other app. One click, and Chrome takes you straight to that tab.</p>
+      <div class="cta">
+        <!-- Replace href with the Chrome Web Store listing once it is published. -->
+        <a class="btn primary" id="store-link" href="https://github.com/ryabenko-pro/quickjump#install-the-extension">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#4285f4"/><circle cx="12" cy="12" r="4.2" fill="#fff"/><circle cx="12" cy="12" r="3.2" fill="#4285f4"/></svg>
+          Add to Chrome — it's free
+        </a>
+        <a class="btn ghost" href="#agent">Get the desktop agent</a>
+      </div>
+      <div class="note">Free and open source · No account · Works in Chrome, Edge, Brave and other Chromium browsers</div>
+    </div>
+    <img class="hero-shot" src="img/1-floating-bar.png" width="1280" height="800" alt="The QuickJump bar floating above a spreadsheet and a terminal, listing a call, a roadmap doc, a dashboard, a pull request and a team chat">
+  </div>
+</header>
+
+<main>
+  <section>
+    <div class="wrap">
+      <p class="problem">You are on a call. You wander off into other windows. Someone asks you a question — and <strong>the meeting tab is nowhere to be found.</strong> QuickJump keeps it one click away.</p>
+    </div>
+  </section>
+
+  <section id="features">
+    <div class="wrap">
+      <div class="center">
+        <h2>Small bar, big shortcut</h2>
+        <p class="sub">Everything you pinned, always in view, never in the way.</p>
+      </div>
+      <div class="features">
+        <div class="card">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></div>
+          <h3>Add from the right-click menu</h3>
+          <p>Right-click any page and choose <em>Add to Quick Jump</em>. Right-click a link to save a page you have not opened yet.</p>
+        </div>
+        <div class="card">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h12M13 6l6 6-6 6"/></svg></div>
+          <h3>One click to jump</h3>
+          <p>Chrome activates the tab, un-minimises its window and raises it, wherever it is.</p>
+        </div>
+        <div class="card">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="13" height="10" rx="2"/><rect x="9" y="10" width="12" height="10" rx="2"/></svg></div>
+          <h3>Floats above every window</h3>
+          <p>Uses Chrome's Picture-in-Picture to stay on top of other apps on Linux, macOS and Windows. No setup.</p>
+        </div>
+        <div class="card">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></div>
+          <h3>Auto-hides</h3>
+          <p>Out of the way while Chrome is focused, back the moment you switch to another app.</p>
+        </div>
+        <div class="card">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></div>
+          <h3>Survives closed tabs</h3>
+          <p>A closed tab stays in the list, dimmed, and reopens with one click. Entries also survive a browser restart.</p>
+        </div>
+        <div class="card">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></div>
+          <h3>Yours to arrange</h3>
+          <p>Drag to reorder. Remove with × or a middle-click. New items land on top, or at the bottom if you prefer.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap split">
+      <div class="text">
+        <h2>Right-click. Add. Done.</h2>
+        <p class="sub" style="margin-bottom:0">Pin the call before you wander off. The entry keeps the page's title and icon, so the list stays easy to scan.</p>
+        <ul class="ticks">
+          <li><strong>Add to Quick Jump</strong>: the current page</li>
+          <li><strong>Add link to Quick Jump</strong>: a link, without opening it</li>
+          <li><strong>Show Quick Jump bar</strong>: bring the bar back</li>
+        </ul>
+      </div>
+      <img class="shot" src="img/2-add-from-menu.png" width="1280" height="800" loading="lazy" alt="The right-click menu on a video call page with Add to Quick Jump highlighted">
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap split flip">
+      <div class="text">
+        <h2>Always on top, no setup</h2>
+        <p class="sub" style="margin-bottom:0">Open the bar from the toolbar. <em>Always on top (PiP)</em> floats it above every app through Chrome's own Picture-in-Picture window. Prefer a regular window? <em>Floating bar</em> opens one; on KDE Plasma a ready-made window rule pins it.</p>
+      </div>
+      <img class="shot" src="img/4-popup.png" width="1280" height="800" loading="lazy" alt="The QuickJump toolbar popup with the list and the Floating bar and Always on top buttons">
+    </div>
+  </section>
+
+  <section id="agent">
+    <div class="wrap split">
+      <div class="text">
+        <h2>Go further with the desktop agent</h2>
+        <p class="sub" style="margin-bottom:0">A small, free companion app. Optional: the extension works fine without it.</p>
+        <ul class="ticks">
+          <li><strong>One window for every profile</strong>: all Chrome profiles and Chromium browsers, with a filter for each</li>
+          <li><strong>Global hotkeys</strong>: <kbd>Alt+Shift+Q</kbd> then <kbd>1</kbd>–<kbd>9</kbd> from any app; <kbd>Alt+Shift+R</kbd> for the newest item</li>
+          <li><strong>Tray icon</strong>: one click jumps to the newest item</li>
+          <li><strong>Works when the browser is closed</strong>: starts the right profile at the saved page</li>
+        </ul>
+        <div class="cta" style="justify-content:flex-start;margin-top:26px">
+          <a class="btn primary" style="background:var(--accent);color:var(--accent-fg)" href="https://github.com/ryabenko-pro/quickjump/releases">Download the agent</a>
+        </div>
+      </div>
+      <img class="shot" src="img/3-agent.png" width="1280" height="800" loading="lazy" alt="The QuickJump agent window listing items from the WORK and Personal profiles, with hotkeys">
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="center">
+        <h2>Agent platforms</h2>
+        <p class="sub">Linux is fully supported. macOS and Windows builds are in preview.</p>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <tr><th>Desktop</th><th>Window on top</th><th>Global hotkeys</th><th>Tray icon</th></tr>
+          <tr><td>KDE Plasma (Wayland, X11)</td><td>Yes, via a KWin rule added automatically</td><td>Yes</td><td>Yes</td></tr>
+          <tr><td>GNOME</td><td>Yes</td><td>Yes, single strike</td><td>With the AppIndicator extension</td></tr>
+          <tr><td>Cinnamon, Xfce, Budgie</td><td>Yes</td><td>Yes, single strike</td><td>Yes</td></tr>
+          <tr><td>Sway, Hyprland, i3, other WMs</td><td>Add a window rule</td><td>Bind <code>quickjump-cmd</code> yourself</td><td>With a bar that has a tray</td></tr>
+          <tr><td>macOS (preview)</td><td>Yes</td><td>Not yet</td><td>Menu bar</td></tr>
+          <tr><td>Windows (preview)</td><td>Yes</td><td>Not yet</td><td>Yes</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="center">
+        <h2>Up and running in a minute</h2>
+        <p class="sub">No account, no configuration.</p>
+      </div>
+      <div class="steps">
+        <div class="step"><h3>Install the extension</h3><p>Add QuickJump to Chrome. It works on its own right away.</p></div>
+        <div class="step"><h3>Pin what matters</h3><p>Right-click a page → <em>Add to Quick Jump</em>. Open the bar from the toolbar icon.</p></div>
+        <div class="step"><h3>Optional: run the agent</h3><p>For global hotkeys, a tray icon and one window for all your profiles. The extension finds it automatically.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="privacy">
+    <div class="wrap">
+      <div class="privacy">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></div>
+        <div>
+          <h2>Private by design</h2>
+          <p>No account, no analytics, no servers. Your list lives in your browser's local storage. If you run the agent, the extension talks only to it, on your own computer (127.0.0.1). Nothing leaves your machine.</p>
+          <p>The code is open source under the MIT license, so you can check every line. <a href="https://github.com/ryabenko-pro/quickjump/blob/main/PRIVACY.md">Read the privacy policy</a>.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span class="grow">© 2026 QuickJump · MIT license</span>
+    <a href="https://github.com/ryabenko-pro/quickjump">Source code</a>
+    <a href="https://github.com/ryabenko-pro/quickjump/issues">Support</a>
+    <a href="https://github.com/ryabenko-pro/quickjump/blob/main/PRIVACY.md">Privacy policy</a>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><link rel="stylesheet" href="scene.css">
+<style>
+  .browser { left: 475px; top: 96px; width: 455px; height: 474px; }
+  .page { position: absolute; inset: 72px 0 0 0; padding: 26px 34px; color: #374151; }
+  .page h2 { margin: 0 0 14px; font-size: 22px; color: #111827; }
+  .page .l { height: 10px; border-radius: 5px; background: #e5e7eb; margin: 10px 0; }
+  .page .chart { display: flex; align-items: flex-end; gap: 12px; height: 130px; margin-top: 24px; }
+  .page .chart i { flex: 1; border-radius: 4px 4px 0 0; background: #c7d2fe; }
+  iframe.qj { left: 622px; top: 170px; width: 300px; height: 222px; border-radius: 8px; }
+  .cursor { left: 850px; top: 372px; }
+</style></head><body>
+  <div class="cap">
+    <div class="brand"><img src="../../../icons/128.png" alt="">QuickJump</div>
+    <h1>Always on top,<br>no setup</h1>
+    <p>Open the bar from the toolbar. "Always on top" floats it with Chrome's Picture-in-Picture, on Linux, macOS and Windows.</p>
+  </div>
+
+  <div class="win browser">
+    <div class="tabs">
+      <div class="tab on"><img src="../favicons/dash.svg" alt="">Production dashboard</div>
+      <div class="tab"><img src="../favicons/call.svg" alt="">Very important call</div>
+      <div class="tab"><img src="../favicons/pr.svg" alt="">PR #1287: Fix login…</div>
+    </div>
+    <div class="omni">‹ › ⟳<span class="url">metrics.example.com/prod</span><span class="ext on"><img src="../../../icons/48.png" alt=""></span></div>
+    <div class="page">
+      <h2>Production — last 24 h</h2>
+      <div class="l" style="width:70%"></div><div class="l" style="width:52%"></div>
+      <div class="chart"><i style="height:40%"></i><i style="height:62%"></i><i style="height:55%"></i><i style="height:80%"></i><i style="height:68%"></i><i style="height:90%"></i><i style="height:74%"></i><i style="height:58%"></i></div>
+    </div>
+  </div>
+
+  <iframe class="qj" src="../harness.html?view=popup&agent=none&n=5"></iframe>
+  <img class="cursor" src="cursor.svg" alt="">
+</body></html>

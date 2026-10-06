@@ -3,7 +3,7 @@
   "name": "QuickJump",
   "version": "0.3.3",
   "description": "Pin tabs to an always-on-top floating bar and jump back to them with one click.",
-  "homepage_url": "https://github.com/ryabenko-pro/quickjump",
+  "homepage_url": "https://ryabenko-pro.github.io/quickjump/",
   "minimum_chrome_version": "116",
   "permissions": ["alarms", "contextMenus", "storage", "tabs"],
   "background": {
