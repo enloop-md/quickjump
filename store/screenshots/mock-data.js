@@ -2,7 +2,7 @@
 const fav = (name) => new URL(`favicons/${name}.svg`, import.meta.url).href;
 
 export const JUMPS = [
-  { id: 'j1', tabId: 11, title: 'Very important call', url: 'https://meet.example.com/abc-defg-hij', favIconUrl: fav('call'), profile: 'WORK' },
+  { id: 'j1', tabId: 11, title: 'Very important call', url: 'https://meet.example.com/abc-defg-hij', favIconUrl: fav('call'), profile: 'WORK', meeting: { kind: 'meet', mic: true, cam: false } },
   { id: 'j2', tabId: 12, title: 'Q4 roadmap — draft', url: 'https://docs.example.com/q4-roadmap', favIconUrl: fav('doc'), profile: 'WORK' },
   { id: 'j3', tabId: 13, title: 'Production dashboard', url: 'https://metrics.example.com/prod', favIconUrl: fav('dash'), profile: 'WORK' },
   { id: 'j4', tabId: 14, title: 'PR #1287: Fix login timeout', url: 'https://git.example.com/app/pull/1287', favIconUrl: fav('pr'), profile: 'WORK' },

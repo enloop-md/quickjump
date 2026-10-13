@@ -98,12 +98,24 @@ export function mountOverlay(root, { onRender, showClose = false } = {}) {
       remove.classList.add('qj-remove');
 
       item.title = dead ? `${label}\n(tab was closed — click to reopen)` : `${label}\n${jump.url}`;
-      item.append(icon, title, remove);
+      item.append(icon, title);
+      // A live Meet/Teams call: its microphone and camera, toggled in place.
+      const meeting = dead ? null : jump.meeting;
+      for (const what of ['mic', 'cam']) {
+        if (meeting && what in meeting) item.append(mediaButton(jump.id, what, meeting[what]));
+      }
+      item.append(remove);
 
       item.addEventListener('click', (event) => {
         if (event.target.closest('.qj-remove')) {
           event.stopPropagation();
           send('remove', { id: jump.id });
+          return;
+        }
+        const media = event.target.closest('.qj-media');
+        if (media) {
+          event.stopPropagation();
+          send('meeting-toggle', { id: jump.id, what: media.dataset.what });
           return;
         }
         send('jump', { id: jump.id });
@@ -212,6 +224,46 @@ function iconButton(glyph, title) {
   button.type = 'button';
   button.textContent = glyph;
   button.title = title;
+  return button;
+}
+
+/* ------------------------------------------------------------ call controls */
+
+const SVG_NS = 'http://www.w3.org/2000/svg';
+const MEDIA_ICONS = {
+  mic: 'M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z',
+  cam: 'M4 6h11a1 1 0 0 1 1 1v3.5l4-3.5v10l-4-3.5V17a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1zm1 2v8h9V8H5z',
+};
+const MEDIA_NAMES = { mic: 'Microphone', cam: 'Camera' };
+
+/**
+ * A microphone or camera toggle for a call row. `on` is true (on), false
+ * (muted / camera off) or null (the page has the button, its state is unknown).
+ */
+function mediaButton(id, what, on) {
+  const button = document.createElement('button');
+  button.className = `qj-btn qj-media qj-media-${what} ${on === true ? 'is-on' : on === false ? 'is-off' : 'is-unknown'}`;
+  button.type = 'button';
+  button.dataset.id = id;
+  button.dataset.what = what;
+  button.draggable = false;
+  const name = MEDIA_NAMES[what];
+  button.title =
+    on === true ? `${name} is on — click to turn it off`
+      : on === false ? `${name} is off — click to turn it on`
+        : `Toggle the ${name.toLowerCase()}`;
+  button.setAttribute('aria-pressed', String(on === false));
+
+  const svg = document.createElementNS(SVG_NS, 'svg');
+  svg.setAttribute('viewBox', '0 0 24 24');
+  svg.setAttribute('aria-hidden', 'true');
+  const path = document.createElementNS(SVG_NS, 'path');
+  path.setAttribute('d', MEDIA_ICONS[what]);
+  const slash = document.createElementNS(SVG_NS, 'path');
+  slash.setAttribute('class', 'qj-media-slash');
+  slash.setAttribute('d', 'M3 3l18 18');
+  svg.append(path, slash);
+  button.append(svg);
   return button;
 }
 

@@ -1,5 +1,6 @@
 """Wires the pieces together: browser connections, merged list, window, tray, hotkeys."""
 
+import sys
 import time
 from urllib.parse import urlsplit
 
@@ -11,6 +12,7 @@ from . import __version__, hotkeys, integration, kwin, profiles, system, themes
 from .config import save_config
 from .settings_dialog import SettingsDialog
 from .state import Store
+from . import window as window_mod
 from .window import BarWindow
 from .wsserver import WsServer
 
@@ -41,6 +43,7 @@ class Agent(QObject):
         self.window.copy_requested.connect(self._copy_url)
         self.window.hide_requested.connect(self.hide_window)
         self.window.newest_requested.connect(self.jump_newest)
+        self.window.media_requested.connect(self.toggle_media)
 
         self.store.changed.connect(self.refresh)
         # Shutting down closes every browser connection; the window may already
@@ -240,6 +243,9 @@ class Agent(QObject):
                 # Closed tab, or a browser profile that is not running: still
                 # clickable, it reopens the URL in that profile.
                 'dead': not j.get('alive') or pid not in self.clients,
+                # Microphone/camera of a live Meet or Teams call, togglable
+                # from the row while its browser is connected.
+                'meeting': j.get('meeting') if j.get('alive') and pid in self.clients else None,
             })
         chips = [(pid, self.profile_name(pid), self.profile_colour(pid)) for pid in used]
         newest = self.store.newest()
@@ -270,6 +276,13 @@ class Agent(QObject):
         if client:
             client.send({'t': 'drop', 'id': jid})
 
+    def toggle_media(self, jid, what):
+        """Mute/unmute ('mic') or switch the camera ('cam') of a call; the browser does it."""
+        j = self.store.jumps.get(jid)
+        client = j and self.clients.get(j.get('profileId'))
+        if client is not None and what in ('mic', 'cam'):
+            client.send({'t': 'media', 'id': jid, 'what': what})
+
     def _copy_url(self, jid):
         j = self.store.jumps.get(jid)
         if j:
@@ -292,6 +305,9 @@ class Agent(QObject):
             self._on_hotkey(action)
 
     def _on_hotkey(self, action):
+        if window_mod.DEBUG_KEYS:
+            print(f'hotkey: {action} (window visible={self.window.isVisible()}, armed={self.window.armed})',
+                  file=sys.stderr, flush=True)
         if action == 'toggle':
             self.toggle_window()
         elif action == 'newest':

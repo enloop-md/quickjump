@@ -1,6 +1,6 @@
 # QuickJump — Privacy Policy
 
-*Last updated: 2026-10-06*
+*Last updated: 2026-10-13*
 
 QuickJump does not collect, transmit, sell or share any personal data. It has
 no analytics, no telemetry, no accounts and no servers.
@@ -23,12 +23,25 @@ to it over a local connection to `127.0.0.1` (your own machine — by default
 port 8787). The agent stores them in a file in your home directory. Nothing
 leaves your computer.
 
+## Call controls on Google Meet and Microsoft Teams
+
+On `meet.google.com`, `teams.microsoft.com`, `teams.live.com` and
+`teams.cloud.microsoft` the extension runs a small script that watches the
+call's **microphone and camera buttons**, so the bar can show whether you are
+muted and let you toggle them without switching to the tab. The script reads
+only those two buttons' state (on/off) and clicks them when you ask. It does
+not read the meeting's content, participants, chat or anything else on the
+page, and it stores nothing beyond that on/off state next to the entry.
+
 ## Permissions
 
 - **tabs** — read the title and URL of the tab you add, and find and activate it later.
 - **contextMenus** — the *Add to Quick Jump* right-click menu.
 - **storage** — keep your list and settings locally.
 - **alarms** — periodically check whether the local agent is running.
+- **Access to meet.google.com and the Teams sites** — the call controls described above.
+- **scripting** — after an install or update, start that same call-controls script in
+  Meet and Teams tabs that are already open, so they need no reload.
 
 ## Removing your data
 

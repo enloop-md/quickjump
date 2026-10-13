@@ -31,6 +31,7 @@ HOW IT WORKS
 • Click an entry to jump straight to it.
 • Drag entries to reorder them. Remove one with × or a middle-click.
 • Closed a pinned tab? The entry stays (dimmed) and reopens its page with one click. Entries also survive a browser restart.
+• On a Google Meet or Microsoft Teams call, the entry shows whether your microphone and camera are on, and toggles them with one click, without switching to the tab.
 • The bar floats above other apps using Chrome's Picture-in-Picture, with no setup needed.
 • Auto-hide: the bar stays out of the way while Chrome is focused and comes back as soon as you switch to another app.
 
@@ -105,7 +106,15 @@ Stores the user's list of pinned tabs and their QuickJump settings locally in ch
 A periodic alarm (every 30 seconds) checks whether the user's optional QuickJump desktop agent is running on their own computer (127.0.0.1) and reconnects to it. An alarm is used because the service worker can be suspended between attempts.
 ```
 
-**Host permissions:** none requested.
+**scripting**
+```
+Runs the extension's own call-controls content script (content/meeting.js) in Google Meet and Microsoft Teams tabs that were already open when the extension was installed or updated, so those tabs do not have to be reloaded. Only the packaged file is executed; no remote code.
+```
+
+**Host permissions** (content script on `meet.google.com`, `teams.microsoft.com`, `*.teams.microsoft.com`, `teams.live.com`, `teams.cloud.microsoft`)
+```
+On Google Meet and Microsoft Teams pages a content script watches the call's microphone and camera buttons, so the QuickJump entry for that call can show whether the user is muted and toggle the microphone or camera with one click without switching to the tab. The script reads only those two buttons' on/off state and clicks them on the user's request; it does not read or store any other page content.
+```
 
 ### Remote code
 
@@ -159,6 +168,7 @@ No account or setup is needed.
 1. Open any web page, right-click it and choose "Add to Quick Jump".
 2. Click the QuickJump toolbar icon. The popup lists the page; click it to jump to that tab from any other tab or window.
 3. Toolbar icon → "Floating bar" opens the bar as a small window. "Always on top (PiP)" opens a pinned tab; press "Float the bar" there to float it above other windows.
+4. Optional: start a Google Meet call (meet.google.com/new) and add that tab. Its entry gains a microphone and a camera icon; clicking them mutes/unmutes or turns the camera on/off in the call.
 
 The extension tries to connect to an optional companion desktop app at ws://127.0.0.1:8787 (the user's own computer). When the app is not installed, the connection fails silently and the extension works on its own. It makes no other network requests.
 ```

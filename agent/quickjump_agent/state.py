@@ -7,7 +7,10 @@ full snapshot; the agent owns what only it can know — the merged order, which
 profiles exist, and which jumps the user removed from the agent window.
 
 A jump here is the extension's record plus `profileId`:
-  { id, profileId, url, title, favIconUrl, addedAt, alive }
+  { id, profileId, url, title, favIconUrl, addedAt, alive, meeting }
+`meeting` is the microphone/camera state of a Meet or Teams tab,
+{kind, mic, cam} with mic/cam True (on), False (off), None (unknown) or
+absent (no such button) — or None when the tab is not in a call.
 """
 
 import json
@@ -21,7 +24,19 @@ from .config import STATE_FILE, write_private
 # it was removed drops it on reconnect instead of bringing it back.
 TOMBSTONE_TTL = 60 * 60 * 24 * 30
 
-JUMP_FIELDS = ('url', 'title', 'favIconUrl', 'addedAt', 'alive')
+JUMP_FIELDS = ('url', 'title', 'favIconUrl', 'addedAt', 'alive', 'meeting')
+
+
+def clean_meeting(raw):
+    """The call-control state as reported, reduced to what the window shows."""
+    if not isinstance(raw, dict):
+        return None
+    state = {'kind': str(raw.get('kind') or '')}
+    for what in ('mic', 'cam'):
+        if what in raw:
+            value = raw[what]
+            state[what] = value if isinstance(value, bool) else None
+    return state if 'mic' in state or 'cam' in state else None
 
 
 class Store(QObject):
@@ -101,6 +116,7 @@ class Store(QObject):
             fresh = {k: raw.get(k) for k in JUMP_FIELDS}
             fresh['addedAt'] = fresh['addedAt'] or 0
             fresh['alive'] = bool(fresh['alive'])
+            fresh['meeting'] = clean_meeting(fresh['meeting'])
             old = self.jumps.get(jid)
             if old is None:
                 self.jumps[jid] = {'id': jid, 'profileId': profile_id, **fresh}

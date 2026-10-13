@@ -215,6 +215,49 @@ body.qj-pip .qj {
   font-style: italic;
 }
 
+/* Call controls of a Meet/Teams row: always visible, red while off. */
+.qj-media {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  color: var(--qj-muted);
+}
+
+.qj-media svg {
+  width: 15px;
+  height: 15px;
+  fill: currentColor;
+  overflow: visible;
+}
+
+.qj-media-slash {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  display: none;
+}
+
+.qj-media.is-off {
+  color: #e4626f;
+}
+
+.qj-media.is-off .qj-media-slash {
+  display: block;
+}
+
+.qj-media.is-unknown {
+  opacity: 0.55;
+}
+
+.qj-media:hover {
+  color: var(--qj-fg);
+}
+
+.qj-media.is-off:hover {
+  color: #ff8a94;
+}
+
 .qj-remove {
   flex: 0 0 auto;
   width: 18px;

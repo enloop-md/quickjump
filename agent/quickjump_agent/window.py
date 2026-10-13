@@ -4,9 +4,11 @@ profile's jumps, with a profile filter on top.
 """
 
 import base64
+import os
+import sys
 
 from PyQt6.QtCore import QByteArray, QObject, QPoint, QRect, QSize, Qt, QTimer, QUrl, pyqtSignal
-from PyQt6.QtGui import QColor, QFont, QGuiApplication, QIcon, QPainter, QPixmap
+from PyQt6.QtGui import QColor, QFont, QGuiApplication, QIcon, QPainter, QPixmap, QPolygon
 from PyQt6.QtNetwork import QNetworkAccessManager, QNetworkReply, QNetworkRequest
 from PyQt6.QtWidgets import (
     QAbstractItemView, QHBoxLayout, QLabel, QListWidget, QListWidgetItem, QMenu,
@@ -16,6 +18,8 @@ from PyQt6.QtWidgets import (
 from . import system, themes
 
 ARM_TIMEOUT_MS = 4000
+# QUICKJUMP_DEBUG_KEYS=1 logs every key the window receives (to diagnose hotkeys).
+DEBUG_KEYS = bool(os.environ.get('QUICKJUMP_DEBUG_KEYS'))
 
 # XKB keycodes (evdev + 8) of the letter keys, by their position on a US
 # layout — so the armed "newest" key is found by where it is on the keyboard,
@@ -26,9 +30,21 @@ ROW_H = 26
 DEFAULT_WIDTH = 300
 EDGE = 5
 REMOVE_W = 22
+MEDIA_W = 22            # one microphone or camera toggle on a call row
+OFF_COLOUR = '#e4626f'  # muted / camera off
+MEDIA_NAMES = {'mic': 'Microphone', 'cam': 'Camera'}
 
 
 ROLE = Qt.ItemDataRole.UserRole
+
+
+def _media_labels(meeting):
+    """[('mic', 'Microphone: on'), ...] for the controls a call row has."""
+    if not meeting:
+        return []
+    words = {True: 'on', False: 'off', None: 'unknown'}
+    return [(what, f'{MEDIA_NAMES[what]}: {words.get(meeting.get(what), "unknown")}')
+            for what in ('mic', 'cam') if what in meeting]
 
 
 def _dot(colour):
@@ -165,6 +181,14 @@ class RowDelegate(QStyledItemDelegate):
         if hovered:
             right -= REMOVE_W
 
+        # Call controls: microphone and camera of a Meet/Teams tab. They keep
+        # their place whether or not the row is hovered, so a click lands.
+        media = self.media_rects(option.rect, row.get('meeting'))
+        if media:
+            right = min(right, min(m.left() for m in media.values()) - 4)
+            for what, rect in media.items():
+                self._paint_media(p, rect, what, row['meeting'].get(what))
+
         # Profile badge: coloured dot + name, only when several profiles exist.
         if row['profile'] and self.bar.show_profiles:
             bf = QFont(option.font)
@@ -199,6 +223,52 @@ class RowDelegate(QStyledItemDelegate):
     def remove_rect(rect):
         return QRect(rect.right() - REMOVE_W - 3, rect.top(), REMOVE_W, rect.height())
 
+    @staticmethod
+    def media_rects(rect, meeting):
+        """{'mic': QRect, 'cam': QRect} for the toggles a call row shows, left of the × slot."""
+        if not meeting:
+            return {}
+        rects = {}
+        x = rect.right() - REMOVE_W - 3
+        for what in ('cam', 'mic'):
+            if what in meeting:
+                x -= MEDIA_W
+                rects[what] = QRect(x, rect.top(), MEDIA_W, rect.height())
+        return rects
+
+    def _paint_media(self, p, rect, what, on):
+        """A small microphone or camera glyph: red with a slash while off, dim when unknown."""
+        c = palette()
+        p.save()
+        p.setRenderHint(QPainter.RenderHint.Antialiasing)
+        colour = QColor(OFF_COLOUR if on is False else c['muted'])
+        if on is None:
+            p.setOpacity(0.5)
+        cx, cy = rect.center().x(), rect.center().y()
+        pen = p.pen()
+        pen.setColor(colour)
+        pen.setWidthF(1.6)
+        pen.setCapStyle(Qt.PenCapStyle.RoundCap)
+        p.setPen(pen)
+        p.setBrush(colour)
+        if what == 'mic':
+            # Capsule, the pick-up arc below it, and the stem.
+            p.drawRoundedRect(QRect(cx - 2, cy - 7, 5, 9), 2.5, 2.5)
+            p.setBrush(Qt.BrushStyle.NoBrush)
+            p.drawArc(QRect(cx - 5, cy - 6, 11, 11), 180 * 16, 180 * 16)
+            p.drawLine(QPoint(cx, cy + 5), QPoint(cx, cy + 8))
+        else:
+            # Body and the lens wedge on its right.
+            p.setPen(Qt.PenStyle.NoPen)
+            p.drawRoundedRect(QRect(cx - 7, cy - 4, 9, 9), 2, 2)
+            p.drawPolygon(QPolygon([QPoint(cx + 3, cy), QPoint(cx + 7, cy - 3), QPoint(cx + 7, cy + 4)]))
+            p.setPen(pen)
+        if on is False:
+            pen.setWidthF(2.0)
+            p.setPen(pen)
+            p.drawLine(QPoint(cx - 7, cy - 7), QPoint(cx + 7, cy + 7))
+        p.restore()
+
 
 class JumpList(QListWidget):
     """
@@ -211,6 +281,7 @@ class JumpList(QListWidget):
 
     activated_id = pyqtSignal(str)
     remove_id = pyqtSignal(str)
+    media_id = pyqtSignal(str, str)  # jump id, 'mic' | 'cam'
     context_id = pyqtSignal(str, QPoint)
     moved = pyqtSignal(int, int)  # from row, to row (as rows read after the move)
 
@@ -285,8 +356,13 @@ class JumpList(QListWidget):
         if e.button() == Qt.MouseButton.MiddleButton:
             self.remove_id.emit(jid)
         elif e.button() == Qt.MouseButton.LeftButton:
-            item_rect = self.visualItemRect(self.itemAt(pos))
-            if RowDelegate.remove_rect(item_rect).contains(pos):
+            item = self.itemAt(pos)
+            item_rect = self.visualItemRect(item)
+            media = RowDelegate.media_rects(item_rect, item.data(ROLE).get('meeting'))
+            hit = next((what for what, rect in media.items() if rect.contains(pos)), None)
+            if hit:
+                self.media_id.emit(jid, hit)
+            elif RowDelegate.remove_rect(item_rect).contains(pos):
                 self.remove_id.emit(jid)
             else:
                 self.activated_id.emit(jid)
@@ -362,6 +438,7 @@ class BarWindow(QWidget):
     copy_requested = pyqtSignal(str)
     hide_requested = pyqtSignal()
     newest_requested = pyqtSignal()
+    media_requested = pyqtSignal(str, str)  # jump id, 'mic' | 'cam'
 
     def __init__(self):
         flags = Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint
@@ -431,6 +508,7 @@ class BarWindow(QWidget):
         self.list.setItemDelegate(RowDelegate(self))
         self.list.activated_id.connect(self._jump)
         self.list.remove_id.connect(self.remove_requested.emit)
+        self.list.media_id.connect(self.media_requested.emit)
         self.list.context_id.connect(self._context_menu)
         self.list.moved.connect(self._move_row)
         self.favicons.updated.connect(self.list.viewport().update)
@@ -551,6 +629,8 @@ class BarWindow(QWidget):
                 tip += f"\nProfile: {row['profile']}"
             if row['dead']:
                 tip += '\n(tab closed — click to reopen)'
+            for what, label in _media_labels(row.get('meeting')):
+                tip += f'\n{label} — click the icon to toggle'
             hotkey = self._slot_hotkey(n)
             if hotkey:
                 tip += f'\nHotkey: {hotkey}'
@@ -589,6 +669,17 @@ class BarWindow(QWidget):
         menu = QMenu(self)
         menu.addAction('Jump', lambda: self._jump(jid))
         menu.addAction('Copy URL', lambda: self.copy_requested.emit(jid))
+        row = next((r for r in self.rows if r['id'] == jid), None)
+        labels = _media_labels(row.get('meeting')) if row else []
+        if labels:
+            menu.addSeparator()
+            for what, label in labels:
+                state = row['meeting'].get(what)
+                verb = 'Turn off' if state is True else 'Turn on' if state is False else 'Toggle'
+                if what == 'mic' and state is not None:
+                    verb = 'Mute' if state else 'Unmute'
+                menu.addAction(f'{verb} {MEDIA_NAMES[what].lower()}',
+                               lambda _=False, w=what: self.media_requested.emit(jid, w))
         menu.addSeparator()
         menu.addAction('Remove', lambda: self.remove_requested.emit(jid))
         menu.exec(global_pos)
@@ -697,6 +788,10 @@ class BarWindow(QWidget):
 
     def keyPressEvent(self, e):
         key = e.key()
+        if DEBUG_KEYS:
+            print(f'key: armed={self.armed} key=0x{key:x} text={e.text()!r} scan={e.nativeScanCode()} '
+                  f'vk={e.nativeVirtualKey()} mods=0x{int(e.modifiers().value):x} repeat={e.isAutoRepeat()} '
+                  f'focus={self.isActiveWindow()}', file=sys.stderr, flush=True)
         if self.armed:
             # Only a digit, the newest key or Esc ends the wait. Auto-repeat of
             # the arm key (still held when focus arrives) and stray keys are

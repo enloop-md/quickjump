@@ -65,6 +65,7 @@ function buildMenus() {
 
 chrome.runtime.onInstalled.addListener(async ({ reason }) => {
   buildMenus();
+  await injectMeetingScripts();
   if (reason !== 'install') return;
   await getProfileId();
   // First run: without the agent, say what it would add.
@@ -100,6 +101,7 @@ async function addTab(tab) {
       favIconUrl: tab.favIconUrl || existing.favIconUrl,
       addedAt: Date.now(),
     });
+    refreshMeeting(tab.id);
     return existing.id;
   }
   const id = crypto.randomUUID();
@@ -111,8 +113,87 @@ async function addTab(tab) {
     title: tab.title || tab.url,
     favIconUrl: tab.favIconUrl || '',
     addedAt: Date.now(),
+    meeting: null,
   });
+  refreshMeeting(tab.id);
   return id;
+}
+
+/* ---------------------------------------------------------- call controls */
+
+/**
+ * On Google Meet and Microsoft Teams tabs a content script (content/meeting.js)
+ * watches the microphone and camera buttons. Their state lives on the jump as
+ * `meeting: { kind, mic, cam } | null` (see the content script for the shape),
+ * so every bar — this profile's, the popup's and the agent's — can show it and
+ * ask to toggle it.
+ */
+
+/**
+ * A content script from the manifest only runs in pages loaded after the
+ * extension itself was; a call that was already open when the extension was
+ * installed or updated would show no controls until reloaded. Inject it there
+ * now (it guards against running twice) and ask each for its state.
+ */
+async function injectMeetingScripts() {
+  const { content_scripts: scripts = [] } = chrome.runtime.getManifest();
+  for (const script of scripts) {
+    let tabs = [];
+    try {
+      tabs = await chrome.tabs.query({ url: script.matches });
+    } catch {
+      continue;
+    }
+    for (const tab of tabs) {
+      try {
+        await chrome.scripting.executeScript({
+          target: { tabId: tab.id, allFrames: Boolean(script.all_frames) },
+          files: script.js,
+        });
+        await refreshMeeting(tab.id);
+      } catch {
+        /* discarded tab, or a frame the browser will not script */
+      }
+    }
+  }
+}
+
+async function applyMeeting(tabId, state) {
+  const jumps = await getJumps();
+  let dirty = false;
+  for (const j of jumps) {
+    if (j.tabId !== tabId) continue;
+    if (JSON.stringify(j.meeting || null) === JSON.stringify(state || null)) continue;
+    j.meeting = state || null;
+    dirty = true;
+  }
+  if (dirty) await setJumps(jumps);
+}
+
+/** Asks the tab's content script for the current state; none answers on other pages. */
+async function refreshMeeting(tabId) {
+  if (tabId == null) return;
+  let state = null;
+  try {
+    const reply = await chrome.tabs.sendMessage(tabId, { type: 'meeting-query' });
+    state = reply?.state || null;
+  } catch {
+    /* no content script in that tab: not a meeting page */
+  }
+  await applyMeeting(tabId, state);
+}
+
+/** Clicks the microphone or camera button of the jump's tab (`what`: 'mic' | 'cam'). */
+async function toggleMeeting(id, what) {
+  if (what !== 'mic' && what !== 'cam') return;
+  const j = (await getJumps()).find((x) => x.id === id);
+  if (!j || j.tabId == null) return;
+  try {
+    await chrome.tabs.sendMessage(j.tabId, { type: 'meeting-toggle', what });
+  } catch {
+    // The page is gone or has no controls any more; drop the stale buttons.
+    await applyMeeting(j.tabId, null);
+  }
 }
 
 async function insertJump(jumps, jump) {
@@ -305,6 +386,18 @@ async function openOverlay({ focus = true } = {}) {
   return win.id;
 }
 
+/**
+ * The bar that opens on its own — when the agent goes away, or when focus
+ * leaves the browser — is only worth the space while this profile has a live
+ * tab to jump to. A list of closed tabs (or nothing) stays out of the way; the
+ * bar is still a click away in the menu or the popup.
+ */
+async function openFallback() {
+  const jumps = await getJumps();
+  if (!jumps.some((j) => j.tabId != null)) return;
+  await openOverlay({ focus: false });
+}
+
 async function closeOverlay({ manual = true } = {}) {
   // A manual close of a focused bar hands focus to another app, which looks
   // exactly like "left Chrome" to auto-show — don't reopen what was just
@@ -371,6 +464,9 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
     dirty = true;
   }
   if (dirty) await setJumps(jumps);
+  // A navigation may have left (or entered) a call page; a page that is no
+  // longer a meeting has no script to report that, so ask.
+  if (dirty && 'url' in changeInfo) await refreshMeeting(tabId);
 });
 
 chrome.tabs.onRemoved.addListener(async (tabId) => {
@@ -380,6 +476,7 @@ chrome.tabs.onRemoved.addListener(async (tabId) => {
     if (j.tabId === tabId) {
       j.tabId = null;
       j.windowId = null;
+      j.meeting = null;
       dirty = true;
     }
   }
@@ -434,7 +531,7 @@ async function autoHideOnFocusChange(windowId) {
       if (Date.now() < suppressAutoShowUntil) return;
       const wins = await chrome.windows.getAll().catch(() => []);
       if (wins.some((w) => w.focused)) return; // it was just a window switch
-      await openOverlay({ focus: false });
+      await openFallback();
     }, 300);
     return;
   }
@@ -474,12 +571,17 @@ const handlers = {
   // the agent existed (an unpacked extension's pages update without a reload,
   // its worker does not).
   'agent-ping': () => connectAgent(),
+  // Bars ask to flip a call's microphone or camera…
+  'meeting-toggle': (msg) => toggleMeeting(msg.id, msg.what),
+  // …and the content script on a Meet/Teams tab reports their state.
+  'meeting-state': (msg, sender) =>
+    sender.tab?.id != null ? applyMeeting(sender.tab.id, msg.state) : undefined,
 };
 
-chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   const handler = handlers[msg?.type];
   if (!handler) return false;
-  Promise.resolve(handler(msg))
+  Promise.resolve(handler(msg, sender))
     .then(() => sendResponse({ ok: true }))
     .catch((err) => sendResponse({ ok: false, error: String(err) }));
   return true;
@@ -490,10 +592,11 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
 initAgent({
   onActivate: async (id) => reportActivated(id, await jump(id)),
   onDrop: (id) => removeJump(id),
+  onMedia: (id, what) => toggleMeeting(id, what),
   // The agent's window replaces this profile's bar while it runs…
   onConnected: () => closeOverlay({ manual: false }),
   // …and the bar comes back, with its "run the agent" alert, when it stops.
-  onDisconnected: () => openOverlay({ focus: false }),
+  onDisconnected: () => openFallback(),
 });
 
 // Every change to this profile's list goes to the agent as a fresh snapshot.

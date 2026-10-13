@@ -50,7 +50,9 @@ def main():
     win.set_hotkeys('double', 'Alt+Shift+Q', 'Alt+Shift+R', '')
     rows = [
         {'id': jid, 'title': title, 'url': '', 'favIconUrl': data_url(icon), 'profileId': prof,
-         'profile': prof, 'colour': PROFILE_COLOURS[PROFILES.index(prof)], 'dead': dead}
+         'profile': prof, 'colour': PROFILE_COLOURS[PROFILES.index(prof)], 'dead': dead,
+         # The call row shows its microphone and camera, as mock-data.js does.
+         'meeting': {'kind': 'meet', 'mic': True, 'cam': False} if jid == 'j1' else None}
         for jid, title, icon, prof, dead in JUMPS
     ]
     win.newest_id = 'j1'

@@ -9,7 +9,7 @@ out="dist/quickjump-extension-$version.zip"
 
 mkdir -p dist
 rm -f "$out"
-zip -qr -X "$out" manifest.json background.js lib popup overlay hub settings icons \
+zip -qr -X "$out" manifest.json background.js lib content popup overlay hub settings icons \
   -x '*.DS_Store' '*~'
 echo "$out"
 unzip -l "$out" | tail -1

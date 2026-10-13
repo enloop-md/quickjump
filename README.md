@@ -21,7 +21,9 @@ Two pieces:
 
 By default both windows **auto-hide**: they disappear while a browser window is
 focused (your tabs are right there) and pop back up the moment you switch to
-another application.
+another application. The extension's own bar only pops up on its own while
+that profile has at least one open tab in the list; a list of closed tabs
+stays out of the way (the bar is still in the toolbar popup and the menu).
 
 ---
 
@@ -110,6 +112,12 @@ The same commands work as `quickjump-agent --cmd newest` (slower to start).
 
 ### Using it
 
+- **Call controls** — an entry for a **Google Meet** or **Microsoft Teams**
+  call shows its microphone and camera; click either to mute / unmute or turn
+  the camera on / off without switching to the tab (red with a slash = off).
+  Works in the agent window, the extension's bar and the toolbar popup. The
+  state comes from a small content script on those sites that watches the
+  call's own buttons and clicks them for you (`content/meeting.js`).
 - **Adding** — *Add to Quick Jump* in any profile goes straight to the agent,
   and its window shows with the new item highlighted. Adding an entry that is
   already listed moves it back to the top.
